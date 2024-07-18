@@ -51,4 +51,4 @@ class Todo(models.Model):
     title=models.CharField(max_length=50)
     entry_date=models.DateField(default=date.today)
     due_date=models.DateField(default=date.today)
-    status=models.BooleanField(default=True)
+    status=models.BooleanField(default=False)
