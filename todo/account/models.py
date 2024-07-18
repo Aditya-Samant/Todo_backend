@@ -49,7 +49,6 @@ class UserData(AbstractUser):
 class Todo(models.Model):
     user=models.ForeignKey("UserData",on_delete=models.CASCADE)
     title=models.CharField(max_length=50)
-    description=models.CharField(max_length=100)
     entry_date=models.DateField(default=date.today)
     due_date=models.DateField(default=date.today)
     status=models.BooleanField(default=True)
