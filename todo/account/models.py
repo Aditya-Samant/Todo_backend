@@ -44,7 +44,7 @@ class UserData(AbstractUser):
     REQUIRED_FIELDS = ['name']
 
     def __str__(self):
-        return str(self.id)
+        return str(self.name)
     
 class Todo(models.Model):
     user=models.ForeignKey("UserData",on_delete=models.CASCADE)
@@ -52,3 +52,5 @@ class Todo(models.Model):
     entry_date=models.DateField(default=date.today)
     due_date=models.DateField(default=date.today)
     status=models.BooleanField(default=False)
+    def __str__(self):
+        return str(self.title)
