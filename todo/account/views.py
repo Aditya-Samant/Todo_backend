@@ -33,14 +33,12 @@ class ResendOtp(APIView):
         user=UserData.objects.filter(email=email)
         if not user.exists():
             return Response({
-                    "status":400,
                     "message":"invalid user "
-                })
+                },status=status.HTTP_400_BAD_REQUEST)
         send_otp_via_mail(email)
         return Response({
-                    "status":200,
                     "message":"otp sent successfully"
-                })
+                },status=status.HTTP_200_OK)
     
 class VerifyOTPView(APIView):
     def post(self,request):
@@ -52,31 +50,27 @@ class VerifyOTPView(APIView):
             user=UserData.objects.filter(email=email)
             if not user.exists():
                 return Response({
-                    "status":400,
                     "message":"invalid user "
-                })
+                },status=status.HTTP_400_BAD_REQUEST)
             if not otp==user[0].otp:
                 return Response({
-                    "status":400,
                     "message":"invalid otp "
-                })
+                },status=status.HTTP_400_BAD_REQUEST)
             user=user.first()
             if user.is_active==True:
                 return Response({
-                    "status":200,
                     "message":"user is already verified"
-                })
+                },status=status.HTTP_200_OK)
             user.is_active=True
             user.otp = None
             user.save()
             return Response({
-                    "status":200,
                     "message":"user verified successfully"
                 })
         return Response({
                     "status":400,
                     "message":serializer.errors
-                }) 
+                },status=status.HTTP_200_OK) 
 
 class ForgotPasswordView(APIView):
     def post(self, request):
@@ -87,17 +81,14 @@ class ForgotPasswordView(APIView):
             if user:
                 send_otp_via_mail(email)
                 return Response({
-                    "status": 200,
                     "message": "OTP sent to your email for password reset"
-                })
+                },status=status.HTTP_200_OK)
             return Response({
-                "status": 404,
                 "message": "User with this email does not exist"
-            })
+            },status=status.HTTP_404_NOT_FOUND)
         return Response({
-            "status": 400,
             "message": serializer.errors
-        })
+        },status=status.HTTP_400_BAD_REQUEST)
     
 class ResetPasswordView(APIView):
     def post(self, request):
@@ -110,29 +101,25 @@ class ResetPasswordView(APIView):
             user = UserData.objects.filter(email=email).first()
             if not user:
                 return Response({
-                    "status": 404,
                     "message": "User with this email does not exist"
-                })
+                },status=status.HTTP_404_NOT_FOUND)
             
             if user.otp != otp:
                 return Response({
-                    "status": 400,
                     "message": "Invalid OTP"
-                })
+                },status=status.HTTP_400_BAD_REQUEST)
             
             user.set_password(new_password)
             user.otp = None  # Clear the OTP after successful password reset
             user.save()
             
             return Response({
-                "status": 200,
                 "message": "Password reset successful"
-            })
+            },status=status.HTTP_200_OK)
         
         return Response({
-            "status": 400,
             "message": serializer.errors
-        })
+        },status=status.HTTP_400_BAD_REQUEST)
 
 class TodosViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
