@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework import viewsets, permissions
 from rest_framework.exceptions import PermissionDenied
@@ -11,6 +12,8 @@ from .email import send_otp_via_mail
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework import status
 from rest_framework.response import Response
+from django.core.mail import send_mail
+from django.conf import settings
 
 class MyTokenObtainPairViews(TokenObtainPairView):
     serializer_class=MyTokenObtainPairSerializer
@@ -55,6 +58,12 @@ class VerifyOTPView(APIView):
             if not otp==user[0].otp:
                 return Response({
                     "message":"invalid otp "
+                },status=status.HTTP_400_BAD_REQUEST)
+            expiration_time = timezone.now() - timezone.timedelta(minutes=10)  # OTP expires after 10 minutes
+            if user[0].otp_created_at < expiration_time:
+                send_otp_via_mail(email)
+                return Response({
+                    "message": "OTP expired!!! New opt has been sent"
                 },status=status.HTTP_400_BAD_REQUEST)
             user=user.first()
             if user.is_active==True:
@@ -108,7 +117,15 @@ class ResetPasswordView(APIView):
                 return Response({
                     "message": "Invalid OTP"
                 },status=status.HTTP_400_BAD_REQUEST)
-            
+            expiration_time = timezone.now() - timezone.timedelta(minutes=10)  # OTP expires after 10 minutes
+            if self.otp_created_at < expiration_time:
+                return Response({
+                    "message": "OTP expired"
+                },status=status.HTTP_400_BAD_REQUEST)
+            subject="Your password change request"
+            message=f"password changed successfully"
+            email_from=settings.EMAIL_HOST
+            send_mail(subject,message,email_from,[email])
             user.set_password(new_password)
             user.otp = None  # Clear the OTP after successful password reset
             user.save()

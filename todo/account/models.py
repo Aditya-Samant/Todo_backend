@@ -10,6 +10,7 @@ class UserData(AbstractUser):
     name = models.CharField(max_length=100, unique=False)
     email = models.EmailField(max_length=100, unique=True)
     otp=models.CharField(max_length=6,null=True,blank=True)
+    otp_created_at = models.DateTimeField(null=True, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
