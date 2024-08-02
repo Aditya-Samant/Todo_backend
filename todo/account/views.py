@@ -118,7 +118,7 @@ class ResetPasswordView(APIView):
                     "message": "Invalid OTP"
                 },status=status.HTTP_400_BAD_REQUEST)
             expiration_time = timezone.now() - timezone.timedelta(minutes=10)  # OTP expires after 10 minutes
-            if self.otp_created_at < expiration_time:
+            if user.otp_created_at < expiration_time:
                 return Response({
                     "message": "OTP expired"
                 },status=status.HTTP_400_BAD_REQUEST)
